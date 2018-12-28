@@ -99,7 +99,7 @@ public class Percolation {
     public boolean isFull(int row, int col) {
         validate(row, col);
         int indexOfThisSite = site2index(row, col);
-        return this.uf.connected(0, indexOfThisSite) && this.uf_noBottom.connected(0, indexOfThisSite);
+        return isOpen(row, col) && this.uf_noBottom.connected(0, indexOfThisSite);
     }
 
     public int numberOfOpenSites() {
