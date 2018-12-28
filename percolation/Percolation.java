@@ -9,8 +9,8 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {
 
     private boolean[][] grid; // open = True, blocked = False;
-    private int n; // row, col = n
-    private WeightedQuickUnionUF uf, uf_noBottom;
+    private final int n; // row, col = n
+    private final WeightedQuickUnionUF uf, ufNoBottom;
     private int numOfOpenSites = 0;
     /**
      * Constructs a n by n grid, with all sites blocked
@@ -32,11 +32,11 @@ public class Percolation {
 
         this.n = n;
         this.uf = new WeightedQuickUnionUF(n * n + 2); // Two more virtual nodes on the top and the bottom
-        this.uf_noBottom = new WeightedQuickUnionUF(n * n + 1);
+        this.ufNoBottom = new WeightedQuickUnionUF(n * n + 1);
         for (int i = 1; i <= n; i++) {
             this.uf.union(0, i); // Union the first row and the top
             this.uf.union(n * n + 1, n * n + 1 - i); // Union the last row and the bottom
-            this.uf_noBottom.union(0, i);
+            this.ufNoBottom.union(0, i);
         }
     }
 
@@ -48,22 +48,6 @@ public class Percolation {
     private int site2index(int row, int col) {
         validate(row, col);
         return (row - 1) * this.n + col;
-    }
-
-    /**
-     * Given the index i, return the site in the gird
-     * @param n the index
-     * */
-    protected int[] index2site(int n) {
-        int col = n % this.n;
-        int row = n / this.n + 1;
-        if (col == 0) {
-            col = this.n;
-            row -= 1;
-        }
-        validate(row, col);
-        int site[] = {row, col};
-        return site;
     }
 
     /**
@@ -94,22 +78,22 @@ public class Percolation {
         // union adjacent open nodes
         if (row > 1 && isOpen(row - 1, col)) {
             this.uf.union(site2index(row - 1, col), indexOfThisSite);
-            this.uf_noBottom.union(site2index(row - 1, col), indexOfThisSite);
+            this.ufNoBottom.union(site2index(row - 1, col), indexOfThisSite);
         }
 
         if (row < this.n && isOpen(row + 1, col)) {
             this.uf.union(site2index(row + 1, col), indexOfThisSite);
-            this.uf_noBottom.union(site2index(row + 1, col), indexOfThisSite);
+            this.ufNoBottom.union(site2index(row + 1, col), indexOfThisSite);
         }
 
         if (col > 1 && isOpen(row, col - 1)) {
             this.uf.union(site2index(row, col - 1), indexOfThisSite);
-            this.uf_noBottom.union(site2index(row, col - 1), indexOfThisSite);
+            this.ufNoBottom.union(site2index(row, col - 1), indexOfThisSite);
         }
 
         if (col < this.n && isOpen(row, col + 1)) {
             this.uf.union(site2index(row, col + 1), indexOfThisSite);
-            this.uf_noBottom.union(site2index(row, col + 1), indexOfThisSite);
+            this.ufNoBottom.union(site2index(row, col + 1), indexOfThisSite);
         }
     }
 
@@ -131,7 +115,7 @@ public class Percolation {
     public boolean isFull(int row, int col) {
         validate(row, col);
         int indexOfThisSite = site2index(row, col);
-        return isOpen(row, col) && this.uf_noBottom.connected(0, indexOfThisSite);
+        return isOpen(row, col) && this.ufNoBottom.connected(0, indexOfThisSite);
     }
 
     /**
@@ -145,10 +129,8 @@ public class Percolation {
      * Check if the system percolates
      * */
     public boolean percolates() {
+        if (this.n == 1) return isOpen(1, 1);
         return this.uf.connected(0, this.n * this.n + 1);
     }
 
-    public static void main(String[] args) {
-
-    }
 }

@@ -8,46 +8,66 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
-    private Percolation perc;
-    private int n, trials;
-    private double[] numOfOpenSites;
+    private final int n, trials;
     private double mean, stddev;
 
-    public PercolationStats(int n, int trials) {
-        if (n <= 0 || trials <= 0) throw new java.lang.IllegalArgumentException("n and trials should be larger than 0");
+    public PercolationStats(int numbers, int trials) {
+        if (numbers <= 0 || trials <= 0) throw new java.lang.IllegalArgumentException("n and trials should be larger than 0");
 
-        this.n = n;
+        this.n = numbers;
         this.trials = trials;
-        this.numOfOpenSites = new double[this.trials];
+        double[] percentOfOpenSites = new double[this.trials];
         for (int i = 0; i < this.trials; i++) {
-            this.perc = new Percolation(n);
-            while (!this.perc.percolates()) {
+            Percolation perc = new Percolation(n);
+            while (!perc.percolates()) {
                 int nextOpenIndex = StdRandom.uniform(1, this.n * this.n + 1); // intervals are half open, like [a, b)
-                int[] site = this.perc.index2site(nextOpenIndex);
+                int[] site = this.index2site(nextOpenIndex);
                 int row = site[0];
                 int col = site[1];
-                this.perc.open(row, col);
+                perc.open(row, col);
             }
-            this.numOfOpenSites[i] = (double) this.perc.numberOfOpenSites() * 1.0 / (n * n);
+            percentOfOpenSites[i] = (double) perc.numberOfOpenSites() / (n * n);
         }
+
+        this.mean = StdStats.mean(percentOfOpenSites);
+        this.stddev = StdStats.stddev(percentOfOpenSites);
+    }
+
+    /**
+     * Given the index i, return the site in the gird
+     * @param n the index
+     * */
+    private int[] index2site(int n) {
+        int col = n % this.n;
+        int row = n / this.n + 1;
+        if (col == 0) {
+            col = this.n;
+            row -= 1;
+        }
+        int[] site = new int[]{row, col};
+        return site;
     }
 
     public double mean() {
-        this.mean = StdStats.mean(this.numOfOpenSites);
         return this.mean;
     }
 
     public double stddev() {
-        this.stddev = StdStats.stddev(this.numOfOpenSites);
         return this.stddev;
     }
 
+    /**
+     * To imporve the performance of confidenceLo() and confidenceHi() by only using 1.96 once */
+    private double confidenceDev() {
+        return 1.96 * this.stddev / Math.sqrt(this.trials);
+    }
+
     public double confidenceLo() {
-        return this.mean - 1.96 * this.stddev / Math.sqrt(this.trials);
+        return this.mean - this.confidenceDev();
     }
 
     public double confidenceHi() {
-        return this.mean + 1.96 * this.stddev / Math.sqrt(this.trials);
+        return this.mean + this.confidenceDev();
     }
 
     public static void main(String[] args) {
