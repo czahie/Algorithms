@@ -46,9 +46,31 @@ public class Percolation {
      * @param col the col of the site
      * */
     private int site2index(int row, int col) {
+        validate(row, col);
         return (row - 1) * this.n + col;
     }
 
+    /**
+     * Given the index i, return the site in the gird
+     * @param n the index
+     * */
+    protected int[] index2site(int n) {
+        int col = n % this.n;
+        int row = n / this.n + 1;
+        if (col == 0) {
+            col = this.n;
+            row -= 1;
+        }
+        validate(row, col);
+        int site[] = {row, col};
+        return site;
+    }
+
+    /**
+     * Given the site (i, j), validate if the site is in the grid
+     * @param row the row of the site
+     * @param col the col of the site
+     * */
     private boolean validate(int row, int col) {
         if (row < 1 || row > this.n || col < 1 || col > this.n) {
             throw new IllegalArgumentException("row " + row + " col " + col + " is out of the grid.");
@@ -91,21 +113,37 @@ public class Percolation {
         }
     }
 
+    /**
+     * Given the site (i, j), check if it's open
+     * @param row the row of the site
+     * @param col the col of the site
+     * */
     public boolean isOpen(int row, int col) {
         validate(row, col);
         return grid[row - 1][col - 1];
     }
 
+    /**
+     * Given the site (i, j), check if it's full (connected to the top node)
+     * @param row the row of the site
+     * @param col the col of the site
+     * */
     public boolean isFull(int row, int col) {
         validate(row, col);
         int indexOfThisSite = site2index(row, col);
         return isOpen(row, col) && this.uf_noBottom.connected(0, indexOfThisSite);
     }
 
+    /**
+     * Return the number of open sites in the grid
+     * */
     public int numberOfOpenSites() {
         return this.numOfOpenSites;
     }
 
+    /**
+     * Check if the system percolates
+     * */
     public boolean percolates() {
         return this.uf.connected(0, this.n * this.n + 1);
     }
